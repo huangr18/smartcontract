@@ -7,7 +7,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-// SmartContract provides functions for managing an Asset
+// SmartContract provides functions for managing an Donation
 type SmartContract struct {
 	contractapi.Contract
 }
@@ -26,12 +26,12 @@ type Donation struct {
 // InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	donations := []Donation{
-		{ID: "asset1", DonationType: "blue", Size: 5, Donor: "Tomoko", AppraisedValue: 300},
-		{ID: "asset2", DonationType: "red", Size: 5, Donor: "Brad", AppraisedValue: 400},
-		{ID: "asset3", DonationType: "green", Size: 10, Donor: "Jin Soo", AppraisedValue: 500},
-		{ID: "asset4", DonationType: "yellow", Size: 10, Donor: "Max", AppraisedValue: 600},
-		{ID: "asset5", DonationType: "black", Size: 15, Donor: "Adriana", AppraisedValue: 700},
-		{ID: "asset6", DonationType: "white", Size: 15, Donor: "Michel", AppraisedValue: 800},
+		{ID: "donation1", DonationType: "money", Size: 0, Donor: "Tomoko", AppraisedValue: 300},
+		{ID: "donation2", DonationType: "money", Size: 0, Donor: "Brad", AppraisedValue: 400},
+		{ID: "donation3", DonationType: "money", Size: 0, Donor: "Jin Soo", AppraisedValue: 500},
+		{ID: "donation4", DonationType: "money", Size: 0, Donor: "Max", AppraisedValue: 600},
+		{ID: "donation5", DonationType: "ssd", Size: 1, Donor: "Adriana", AppraisedValue: 700},
+		{ID: "donation6", DonationType: "keyboard", Size: 5, Donor: "Michel", AppraisedValue: 800},
 	}
 
 	for _, donation := range donations {
@@ -61,7 +61,7 @@ func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterfa
 
 	donation := Donation{
 		ID:             id,
-		DonationType:          donationType,
+		DonationType:   donationType,
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
@@ -81,7 +81,7 @@ func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
 	}
 	if donationJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
+		return nil, fmt.Errorf("the donation %s does not exist", id)
 	}
 
 	var donation Donation
@@ -106,7 +106,7 @@ func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterfa
 	// overwriting original asset with new asset
 	donation := Donation{
 		ID:             id,
-		DonationType:          donationType,
+		DonationType:   donationType,
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
@@ -143,7 +143,7 @@ func (s *SmartContract) DonationExists(ctx contractapi.TransactionContextInterfa
 }
 
 // TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
-func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newDonor string) (string, error) {
+func (s *SmartContract) TransferDonation(ctx contractapi.TransactionContextInterface, id string, newDonor string) (string, error) {
 	donation, err := s.ReadDonation(ctx, id)
 	if err != nil {
 		return "", err
