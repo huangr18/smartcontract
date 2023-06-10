@@ -17,7 +17,7 @@ type SmartContract struct {
 // rder when marshal golang keeps the oto json but doesn't order automatically
 type Donation struct {
 	AppraisedValue int    `json:"AppraisedValue"`
-	Color          string `json:"Color"`
+	DonationType   string `json:"DonationType"`
 	ID             string `json:"ID"`
 	Donor          string `json:"Donor"`
 	Size           int    `json:"Size"`
@@ -26,12 +26,12 @@ type Donation struct {
 // InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	donations := []Donation{
-		{ID: "asset1", Color: "blue", Size: 5, Donor: "Tomoko", AppraisedValue: 300},
-		{ID: "asset2", Color: "red", Size: 5, Donor: "Brad", AppraisedValue: 400},
-		{ID: "asset3", Color: "green", Size: 10, Donor: "Jin Soo", AppraisedValue: 500},
-		{ID: "asset4", Color: "yellow", Size: 10, Donor: "Max", AppraisedValue: 600},
-		{ID: "asset5", Color: "black", Size: 15, Donor: "Adriana", AppraisedValue: 700},
-		{ID: "asset6", Color: "white", Size: 15, Donor: "Michel", AppraisedValue: 800},
+		{ID: "asset1", DonationType: "blue", Size: 5, Donor: "Tomoko", AppraisedValue: 300},
+		{ID: "asset2", DonationType: "red", Size: 5, Donor: "Brad", AppraisedValue: 400},
+		{ID: "asset3", DonationType: "green", Size: 10, Donor: "Jin Soo", AppraisedValue: 500},
+		{ID: "asset4", DonationType: "yellow", Size: 10, Donor: "Max", AppraisedValue: 600},
+		{ID: "asset5", DonationType: "black", Size: 15, Donor: "Adriana", AppraisedValue: 700},
+		{ID: "asset6", DonationType: "white", Size: 15, Donor: "Michel", AppraisedValue: 800},
 	}
 
 	for _, donation := range donations {
@@ -50,7 +50,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterface, id string, color string, size int, donor string, appraisedValue int) error {
+func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterfa
 
 	donation := Donation{
 		ID:             id,
-		Color:          color,
+		DonationType:   donationType,
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
@@ -84,17 +84,17 @@ func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface
 		return nil, fmt.Errorf("the asset %s does not exist", id)
 	}
 
-	var asset Donation
-	err = json.Unmarshal(donationJSON, &asset)
+	var donation Donation
+	err = json.Unmarshal(donationJSON, &donation)
 	if err != nil {
 		return nil, err
 	}
 
-	return &asset, nil
+	return &donation, nil
 }
 
 // UpdateAsset updates an existing asset in the world state with provided parameters.
-func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterface, id string, color string, size int, donor string, appraisedValue int) error {
+func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterfa
 	// overwriting original asset with new asset
 	donation := Donation{
 		ID:             id,
-		Color:          color,
+		DonationType:   donationType,
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
@@ -182,12 +182,12 @@ func (s *SmartContract) GetAllDonations(ctx contractapi.TransactionContextInterf
 			return nil, err
 		}
 
-		var asset Donation
-		err = json.Unmarshal(queryResponse.Value, &asset)
+		var donation Donation
+		err = json.Unmarshal(queryResponse.Value, &donation)
 		if err != nil {
 			return nil, err
 		}
-		donations = append(donations, &asset)
+		donations = append(donations, &donation)
 	}
 
 	return donations, nil
