@@ -12,7 +12,7 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
-// Asset describes basic details of what makes up a simple asset
+// Donation describes basic details of what makes up a simple donation
 // Insert struct field in alphabetic order => to achieve determinism across languages
 // rder when marshal golang keeps the oto json but doesn't order automatically
 type Donation struct {
@@ -23,7 +23,7 @@ type Donation struct {
 	Size           int    `json:"Size"`
 }
 
-// InitLedger adds a base set of assets to the ledger
+// InitLedger adds a base set of donations to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	donations := []Donation{
 		{ID: "donation1", DonationType: "money", Size: 0, Donor: "Tomoko", AppraisedValue: 300},
@@ -49,7 +49,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	return nil
 }
 
-// CreateAsset issues a new asset to the world state with given details.
+// CreateDonation issues a new donation to the world state with given details.
 func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterfa
 	return ctx.GetStub().PutState(id, donationJSON)
 }
 
-// ReadAsset returns the asset stored in the world state with given id.
+// ReadDonation returns the donation stored in the world state with given id.
 func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface, id string) (*Donation, error) {
 	donationJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface
 	return &donation, nil
 }
 
-// UpdateAsset updates an existing asset in the world state with provided parameters.
+// UpdateDonation updates an existing donation in the world state with provided parameters.
 func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterfa
 		return fmt.Errorf("the donation %s does not exist", id)
 	}
 
-	// overwriting original asset with new asset
+	// overwriting original donation with new donation
 	donation := Donation{
 		ID:             id,
 		DonationType:   donationType,
@@ -119,7 +119,7 @@ func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterfa
 	return ctx.GetStub().PutState(id, donationJSON)
 }
 
-// DeleteAsset deletes an given asset from the world state.
+// DeleteDonation deletes an given donation from the world state.
 func (s *SmartContract) DeleteDonation(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
@@ -132,7 +132,7 @@ func (s *SmartContract) DeleteDonation(ctx contractapi.TransactionContextInterfa
 	return ctx.GetStub().DelState(id)
 }
 
-// AssetExists returns true when asset with given ID exists in world state
+// DonationExists returns true when donation with given ID exists in world state
 func (s *SmartContract) DonationExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	donationJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -142,7 +142,7 @@ func (s *SmartContract) DonationExists(ctx contractapi.TransactionContextInterfa
 	return donationJSON != nil, nil
 }
 
-// TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
+// TransferDonation updates the donor field of donation with given id in world state, and returns the old donor.
 func (s *SmartContract) TransferDonation(ctx contractapi.TransactionContextInterface, id string, newDonor string) (string, error) {
 	donation, err := s.ReadDonation(ctx, id)
 	if err != nil {
@@ -165,10 +165,10 @@ func (s *SmartContract) TransferDonation(ctx contractapi.TransactionContextInter
 	return oldDonor, nil
 }
 
-// GetAllAssets returns all assets found in world state
+// GetAllDonations returns all donations found in world state
 func (s *SmartContract) GetAllDonations(ctx contractapi.TransactionContextInterface) ([]*Donation, error) {
 	// range query with empty string for startKey and endKey does an
-	// open-ended query of all assets in the chaincode namespace.
+	// open-ended query of all donations in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		return nil, err
