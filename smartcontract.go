@@ -7,7 +7,7 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
-// SmartContract provides functions for managing an Asset
+// SmartContract provides functions for managing an Donation
 type SmartContract struct {
 	contractapi.Contract
 }
@@ -21,17 +21,19 @@ type Donation struct {
 	ID             string `json:"ID"`
 	Donor          string `json:"Donor"`
 	Size           int    `json:"Size"`
+	Timestamp      int    `jason:"Timestamp"`
+	Status         string `jason:"Status"`
 }
 
 // InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	donations := []Donation{
-		{ID: "asset1", DonationType: "blue", Size: 5, Donor: "Tomoko", AppraisedValue: 300},
-		{ID: "asset2", DonationType: "red", Size: 5, Donor: "Brad", AppraisedValue: 400},
-		{ID: "asset3", DonationType: "green", Size: 10, Donor: "Jin Soo", AppraisedValue: 500},
-		{ID: "asset4", DonationType: "yellow", Size: 10, Donor: "Max", AppraisedValue: 600},
-		{ID: "asset5", DonationType: "black", Size: 15, Donor: "Adriana", AppraisedValue: 700},
-		{ID: "asset6", DonationType: "white", Size: 15, Donor: "Michel", AppraisedValue: 800},
+		{ID: "donation1", DonationType: "money", Size: 0, Donor: "Tomoko", AppraisedValue: 300, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
+		{ID: "donation2", DonationType: "money", Size: 0, Donor: "Brad", AppraisedValue: 400, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
+		{ID: "donation3", DonationType: "money", Size: 0, Donor: "Jin Soo", AppraisedValue: 500, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
+		{ID: "donation4", DonationType: "money", Size: 0, Donor: "Max", AppraisedValue: 600, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
+		{ID: "donation5", DonationType: "ssd", Size: 1, Donor: "Adriana", AppraisedValue: 700, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
+		{ID: "donation6", DonationType: "keyboard", Size: 5, Donor: "Michel", AppraisedValue: 800, Timestamp: 1688404431, Status: "time.Date(2000, 2, 1, 12, 30, 0, 0, time.UTC)"},
 	}
 
 	for _, donation := range donations {
@@ -50,7 +52,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
+func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int, timestamp int, status string) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
 		return err
@@ -65,6 +67,8 @@ func (s *SmartContract) CreateDonation(ctx contractapi.TransactionContextInterfa
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
+		Timestamp:      timestamp,
+		Status:         status,
 	}
 	donationJSON, err := json.Marshal(donation)
 	if err != nil {
@@ -81,7 +85,7 @@ func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
 	}
 	if donationJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
+		return nil, fmt.Errorf("the donation %s does not exist", id)
 	}
 
 	var donation Donation
@@ -94,7 +98,7 @@ func (s *SmartContract) ReadDonation(ctx contractapi.TransactionContextInterface
 }
 
 // UpdateAsset updates an existing asset in the world state with provided parameters.
-func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int) error {
+func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterface, id string, donationType string, size int, donor string, appraisedValue int, timestamp int, status string) error {
 	exists, err := s.DonationExists(ctx, id)
 	if err != nil {
 		return err
@@ -110,6 +114,8 @@ func (s *SmartContract) UpdateDonation(ctx contractapi.TransactionContextInterfa
 		Size:           size,
 		Donor:          donor,
 		AppraisedValue: appraisedValue,
+		Timestamp:      timestamp,
+		Status:         status,
 	}
 	donationJSON, err := json.Marshal(donation)
 	if err != nil {
@@ -143,7 +149,7 @@ func (s *SmartContract) DonationExists(ctx contractapi.TransactionContextInterfa
 }
 
 // TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
-func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newDonor string) (string, error) {
+func (s *SmartContract) TransferDonation(ctx contractapi.TransactionContextInterface, id string, newDonor string) (string, error) {
 	donation, err := s.ReadDonation(ctx, id)
 	if err != nil {
 		return "", err
